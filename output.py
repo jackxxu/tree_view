@@ -4,12 +4,12 @@ import json
 # Create a simple graph with additional attributes
 G = nx.DiGraph()
 G.add_nodes_from([
-    (1, {"color": "red", "shape": "circle"}),
-    (2, {"color": "blue", "shape": "rect"}),
-    (3, {"color": "green", "shape": "circle"}),
-    (4, {"color": "orange", "shape": "rect"}),
-    (5, {"color": "purple", "shape": "circle"}),
-    (6, {"color": "yellow", "shape": "rect"})
+    (1, {"color": "red", "shape": "circle", "hover_text": "Node 1"}),
+    (2, {"color": "blue", "shape": "rect", "hover_text": "Node 2"}),
+    (3, {"color": "green", "shape": "circle", "hover_text": "Node 3"}),
+    (4, {"color": "orange", "shape": "rect", "hover_text": "Node 4"}),
+    (5, {"color": "purple", "shape": "circle", "hover_text": "Node 5"}),
+    (6, {"color": "yellow", "shape": "rect", "hover_text": "Node 6"})
 ])
 G.add_edges_from([(1, 2), (1, 3), (2, 4), (3, 5), (3, 6)])
 

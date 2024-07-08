@@ -23,6 +23,19 @@
             margin-top: 10px;
             padding: 10px;
         }
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: auto;
+            height: auto;
+            padding: 4px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 4px;
+            pointer-events: none;
+            visibility: hidden;
+        }
     </style>
 </head>
 <body>
@@ -31,12 +44,12 @@
         "multigraph": false,
         "graph": {},
         "nodes": [
-            {"id": 1, "color": "red", "shape": "circle"},
-            {"id": 2, "color": "blue", "shape": "rect"},
-            {"id": 3, "color": "green", "shape": "circle"},
-            {"id": 4, "color": "orange", "shape": "rect"},
-            {"id": 5, "color": "purple", "shape": "circle"},
-            {"id": 6, "color": "yellow", "shape": "rect"}
+            {"id": 1, "color": "red", "shape": "circle", "hover_text": "Node 1"},
+            {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
+            {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
+            {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
+            {"id": 5, "color": "purple", "shape": "circle", "hover_text": "Node 5"},
+            {"id": 6, "color": "yellow", "shape": "rect", "hover_text": "Node 6"}
         ],
         "links": [
             {"source": 1, "target": 2},
@@ -47,6 +60,7 @@
         ]
     }</textarea>
     <button onclick="updateGraph()">Update Graph</button>
+    <div class="tooltip" id="tooltip"></div>
     <svg width="1200" height="800"></svg> <!-- Increased size -->
     <script>
         const svg = d3.select("svg"),
@@ -60,6 +74,8 @@
             });
 
         svg.call(zoom);
+
+        const tooltip = d3.select("#tooltip");
 
         function updateGraph() {
             const jsonData = document.getElementById('json-input').value;
@@ -94,7 +110,22 @@
                 .data(graph.nodes)
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("fill", d => d.color || "#1f77b4");
+                .attr("fill", d => d.color || "#1f77b4")
+                .on("mouseover", (event, d) => {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("visibility", "visible")
+                        .text(d.hover_text || `Node ${d.id}`);
+                })
+                .on("mousemove", (event) => {
+                    tooltip.style("top", (event.pageY - 10) + "px")
+                        .style("left", (event.pageX + 10) + "px");
+                })
+                .on("mouseout", () => {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("visibility", "hidden");
+                });
 
             // Draw shapes based on the shape attribute
             node.each(function(d) {
