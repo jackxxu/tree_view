@@ -15,10 +15,13 @@
             stroke-opacity: 0.6;
             stroke-width: 1.5px;
         }
-        .additional-link {
+        .highlighted-node {
             stroke: #ff0000;
-            stroke-dasharray: 3, 3;
-            stroke-width: 1.5px;
+            stroke-width: 2.5px;
+        }
+        .highlighted-link {
+            stroke: #ff0000;
+            stroke-width: 2.5px;
         }
         textarea {
             width: 100%;
@@ -120,7 +123,7 @@
             });
 
             // Set initial positions
-            const greenNodeYVariation = 20;
+            const greenNodeYVariation = 40; // Increased variation
             graph.nodes.forEach(node => {
                 if (node.id === "root") {
                     node.fx = width / 2;
@@ -160,15 +163,17 @@
                         .duration(200)
                         .style("visibility", "visible")
                         .text(d.hover_text || `Node ${d.id}`);
+                    highlightConnected(d);
                 })
                 .on("mousemove", (event) => {
                     tooltip.style("top", (event.pageY - 10) + "px")
                         .style("left", (event.pageX + 10) + "px");
                 })
-                .on("mouseout", () => {
+                .on("mouseout", (event, d) => {
                     tooltip.transition()
                         .duration(500)
                         .style("visibility", "hidden");
+                    removeHighlight(d);
                 });
 
             // Draw shapes based on the shape attribute
@@ -239,6 +244,38 @@
                     d.fx = null;
                     d.fy = null;
                 }
+            }
+
+            function highlightConnected(d) {
+                const connectedNodes = new Set();
+                const connectedLinks = [];
+
+                graph.links.forEach(link => {
+                    if (link.source.id === d.id) {
+                        connectedNodes.add(link.target.id);
+                        connectedLinks.push(link);
+                    } else if (link.target.id === d.id) {
+                        connectedNodes.add(link.source.id);
+                        connectedLinks.push(link);
+                    }
+                });
+
+                node.each(function(n) {
+                    if (connectedNodes.has(n.id) || n.id === d.id) {
+                        d3.select(this).classed("highlighted-node", true);
+                    }
+                });
+
+                link.each(function(l) {
+                    if (connectedLinks.includes(l)) {
+                        d3.select(this).classed("highlighted-link", true);
+                    }
+                });
+            }
+
+            function removeHighlight() {
+                node.classed("highlighted-node", false);
+                link.classed("highlighted-link", false);
             }
         }
 
