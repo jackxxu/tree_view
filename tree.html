@@ -15,6 +15,11 @@
             stroke-opacity: 0.6;
             stroke-width: 1.5px;
         }
+        .additional-link {
+            stroke: #ff0000;
+            stroke-dasharray: 3, 3;
+            stroke-width: 1.5px;
+        }
         textarea {
             width: 100%;
             height: 150px;
@@ -44,16 +49,16 @@
         "multigraph": false,
         "graph": {},
         "nodes": [
-            {"id": 1, "color": "red", "shape": "circle", "hover_text": "Node 1"},
+            {"id": "root", "color": "red", "shape": "circle", "hover_text": "Root Node"},
             {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
             {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
             {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
             {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
-            {"id": 6, "color": "yellow", "shape": "triangle", "hover_text": "Node 6"}
+            {"id": 6, "color": "green", "shape": "triangle", "hover_text": "Node 6"}
         ],
         "links": [
-            {"source": 1, "target": 2},
-            {"source": 1, "target": 3},
+            {"source": "root", "target": 2},
+            {"source": "root", "target": 3},
             {"source": 2, "target": 4},
             {"source": 3, "target": 5},
             {"source": 3, "target": 6},
@@ -106,6 +111,7 @@
                     }
                 }
             }
+
             // Start with the root nodes
             graph.nodes.forEach(node => {
                 if (!graph.links.some(link => link.target === node.id)) {
@@ -113,11 +119,25 @@
                 }
             });
 
+            // Set initial positions
+            graph.nodes.forEach(node => {
+                if (node.id === "root") {
+                    node.fx = width / 2;
+                    node.fy = 50;
+                } else if (node.color === "green") {
+                    node.fy = height - 100;
+                }
+            });
+
             const simulation = d3.forceSimulation(graph.nodes)
-                .force("link", d3.forceLink(graph.links).id(d => d.id).distance(150))
-                .force("charge", d3.forceManyBody().strength(-300))
+                .force("link", d3.forceLink(graph.links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-500))
                 .force("center", d3.forceCenter(width / 2, height / 2))
-                .force("y", d3.forceY(d => levelMap[d.id] * 100).strength(1)) // Add force to keep nodes in a top-down manner
+                .force("y", d3.forceY(d => {
+                    if (d.id === "root") return 50;
+                    if (d.color === "green") return height - 100;
+                    return levelMap[d.id] * 100;
+                }).strength(1))
                 .force("collide", d3.forceCollide().radius(50));
 
             const link = g.append("g")
@@ -215,8 +235,10 @@
 
             function dragended(event, d) {
                 if (!event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
+                if (d.id !== "root" && d.color !== "green") {
+                    d.fx = null;
+                    d.fy = null;
+                }
             }
         }
 
