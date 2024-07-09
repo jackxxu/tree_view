@@ -90,55 +90,56 @@
 
             svg.selectAll("*").remove(); // Clear the SVG canvas
 
-            const g = svg.append("g");
-
-            // Create a map of levels to keep track of the hierarchy
-            let levelMap = {};
-            function setLevel(node, level) {
-                if (!levelMap[node.id]) {
-                    levelMap[node.id] = level;
-                    if (graph.links) {
-                        graph.links.forEach(link => {
-                            if (link.source === node.id) {
-                                setLevel(graph.nodes.find(n => n.id === link.target), level + 1);
-                            }
-                        });
-                    }
-                }
-            }
-            // Start with the root nodes
+            // Create a map to track nodes by ID
+            let nodeMap = {};
             graph.nodes.forEach(node => {
-                if (!graph.links.some(link => link.target === node.id)) {
-                    setLevel(node, 0);
+                nodeMap[node.id] = { ...node, children: [] };
+            });
+
+            // Build the tree structure
+            let rootNodes = [];
+            graph.links.forEach(link => {
+                if (nodeMap[link.source] && nodeMap[link.target]) {
+                    nodeMap[link.source].children.push(nodeMap[link.target]);
+                    nodeMap[link.target].parent = nodeMap[link.source];
                 }
             });
 
-            const simulation = d3.forceSimulation(graph.nodes)
-                .force("link", d3.forceLink(graph.links).id(d => d.id).distance(150))
-                .force("charge", d3.forceManyBody().strength(-300))
-                .force("center", d3.forceCenter(width / 2, height / 2))
-                .force("y", d3.forceY(d => levelMap[d.id] * 100).strength(1)) // Add force to keep nodes in a top-down manner
-                .force("collide", d3.forceCollide().radius(50));
+            // Find the root nodes (nodes without parents)
+            graph.nodes.forEach(node => {
+                if (!nodeMap[node.id].parent) {
+                    rootNodes.push(nodeMap[node.id]);
+                }
+            });
 
-            const link = g.append("g")
-                .attr("class", "links")
-                .selectAll("line")
-                .data(graph.links)
+            // Create a hierarchical structure for the tree layout
+            const root = d3.hierarchy(rootNodes[0], d => d.children);
+
+            const treeLayout = d3.tree().size([width - 100, height - 200]);
+            treeLayout(root);
+
+            const g = svg.append("g").attr("transform", "translate(50,50)");
+
+            const link = g.selectAll(".link")
+                .data(root.links())
                 .enter().append("line")
-                .attr("class", "link");
+                .attr("class", "link")
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
 
-            const node = g.append("g")
-                .attr("class", "nodes")
-                .selectAll("g")
-                .data(graph.nodes)
+            const node = g.selectAll(".node")
+                .data(root.descendants())
                 .enter().append("g")
                 .attr("class", "node")
-                .attr("fill", d => d.color || "#1f77b4")
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .attr("fill", d => d.data.color || "#1f77b4")
                 .on("mouseover", (event, d) => {
                     tooltip.transition()
                         .duration(200)
                         .style("visibility", "visible")
-                        .text(d.hover_text || `Node ${d.id}`);
+                        .text(d.data.hover_text || `Node ${d.data.id}`);
                 })
                 .on("mousemove", (event) => {
                     tooltip.style("top", (event.pageY - 10) + "px")
@@ -152,72 +153,38 @@
 
             // Draw shapes based on the shape attribute
             node.each(function(d) {
-                if (d.shape === "rect") {
+                if (d.data.shape === "rect") {
                     d3.select(this).append("rect")
                         .attr("width", 16)
                         .attr("height", 16)
                         .attr("x", -8)
                         .attr("y", -8)
-                        .attr("fill", d.color || "#1f77b4");
-                } else if (d.shape === "diamond") {
+                        .attr("fill", d.data.color || "#1f77b4");
+                } else if (d.data.shape === "diamond") {
                     d3.select(this).append("path")
                         .attr("d", d3.symbol().type(d3.symbolDiamond).size(256))
-                        .attr("fill", d.color || "#1f77b4");
-                } else if (d.shape === "triangle") {
+                        .attr("fill", d.data.color || "#1f77b4");
+                } else if (d.data.shape === "triangle") {
                     d3.select(this).append("path")
                         .attr("d", d3.symbol().type(d3.symbolTriangle).size(256))
-                        .attr("fill", d.color || "#1f77b4");
+                        .attr("fill", d.data.color || "#1f77b4");
                 } else {
                     d3.select(this).append("circle")
                         .attr("r", 8)
-                        .attr("fill", d.color || "#1f77b4");
+                        .attr("fill", d.data.color || "#1f77b4");
                 }
             });
 
-            node.call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
-
-            const label = g.append("g")
-                .attr("class", "labels")
-                .selectAll("text")
-                .data(graph.nodes)
+            const label = g.selectAll(".label")
+                .data(root.descendants())
                 .enter().append("text")
-                .attr("dx", 12)
+                .attr("class", "label")
+                .attr("x", d => d.x)
+                .attr("y", d => d.y + 12)
+                .attr("dx", 0)
                 .attr("dy", ".35em")
-                .text(d => d.id);
-
-            simulation.on("tick", () => {
-                link
-                    .attr("x1", d => d.source.x)
-                    .attr("y1", d => d.source.y)
-                    .attr("x2", d => d.target.x)
-                    .attr("y2", d => d.target.y);
-
-                node.attr("transform", d => `translate(${d.x},${d.y})`);
-
-                label
-                    .attr("x", d => d.x)
-                    .attr("y", d => d.y);
-            });
-
-            function dragstarted(event, d) {
-                if (!event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-            }
-
-            function dragged(event, d) {
-                d.fx = event.x;
-                d.fy = event.y;
-            }
-
-            function dragended(event, d) {
-                if (!event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-            }
+                .attr("transform", d => `rotate(45,${d.x},${d.y + 12})`)
+                .text(d => d.data.id);
         }
 
         // Initialize the graph visualization with default data
