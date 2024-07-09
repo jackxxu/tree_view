@@ -19,8 +19,12 @@
             stroke: #ff0000;
             stroke-width: 2.5px;
         }
-        .highlighted-link {
-            stroke: #ff0000;
+        .highlighted-link-incoming {
+            stroke: #00ff00; /* Green for incoming edges */
+            stroke-width: 2.5px;
+        }
+        .highlighted-link-outgoing {
+            stroke: #0000ff; /* Blue for outgoing edges */
             stroke-width: 2.5px;
         }
         textarea {
@@ -48,36 +52,30 @@
     </style>
 </head>
 <body>
-    <div>
-        <textarea id="json-input" placeholder="Paste your JSON graph data here...">{
-            "directed": true,
-            "multigraph": false,
-            "graph": {},
-            "nodes": [
-                {"id": "root", "color": "red", "shape": "circle", "hover_text": "Root Node"},
-                {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
-                {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
-                {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
-                {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
-                {"id": 6, "color": "green", "shape": "triangle", "hover_text": "Node 6"}
-            ],
-            "links": [
-                {"source": "root", "target": 2},
-                {"source": "root", "target": 3},
-                {"source": 2, "target": 4},
-                {"source": 3, "target": 5},
-                {"source": 3, "target": 6},
-                {"source": 4, "target": 6}
-            ]
-        }</textarea>    
-    </div>
-    <div>
-        <button onclick="updateGraph()">Update Graph</button>
-    </div>
-    <div>
-        <svg width="1200" height="800"></svg>
-        <div class="tooltip" id="tooltip"></div>
-    </div>
+    <textarea id="json-input" placeholder="Paste your JSON graph data here...">{
+        "directed": true,
+        "multigraph": false,
+        "graph": {},
+        "nodes": [
+            {"id": "root", "color": "red", "shape": "circle", "hover_text": "Root Node"},
+            {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
+            {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
+            {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
+            {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
+            {"id": 6, "color": "green", "shape": "triangle", "hover_text": "Node 6"}
+        ],
+        "links": [
+            {"source": "root", "target": 2},
+            {"source": "root", "target": 3},
+            {"source": 2, "target": 4},
+            {"source": 3, "target": 5},
+            {"source": 3, "target": 6},
+            {"source": 4, "target": 6}
+        ]
+    }</textarea>
+    <button onclick="updateGraph()">Update Graph</button>
+    <svg width="1200" height="800"></svg>
+    <div class="tooltip" id="tooltip"></div>
     <script>
         const svg = d3.select("svg"),
             width = +svg.attr("width"),
@@ -130,7 +128,7 @@
             });
 
             // Set initial positions
-            const greenNodeYVariation = 100; // Increased variation
+            const greenNodeYVariation = 40; // Increased variation
             graph.nodes.forEach(node => {
                 if (node.id === "root") {
                     node.fx = width / 2;
@@ -260,10 +258,10 @@
                 graph.links.forEach(link => {
                     if (link.source.id === d.id) {
                         connectedNodes.add(link.target.id);
-                        connectedLinks.push(link);
+                        connectedLinks.push({ link: link, type: 'outgoing' });
                     } else if (link.target.id === d.id) {
                         connectedNodes.add(link.source.id);
-                        connectedLinks.push(link);
+                        connectedLinks.push({ link: link, type: 'incoming' });
                     }
                 });
 
@@ -274,15 +272,18 @@
                 });
 
                 link.each(function(l) {
-                    if (connectedLinks.includes(l)) {
-                        d3.select(this).classed("highlighted-link", true);
-                    }
+                    connectedLinks.forEach(cl => {
+                        if (cl.link === l) {
+                            d3.select(this).classed(cl.type === 'incoming' ? "highlighted-link-incoming" : "highlighted-link-outgoing", true);
+                        }
+                    });
                 });
             }
 
             function removeHighlight() {
                 node.classed("highlighted-node", false);
-                link.classed("highlighted-link", false);
+                link.classed("highlighted-link-incoming", false);
+                link.classed("highlighted-link-outgoing", false);
             }
         }
 
