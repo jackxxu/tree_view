@@ -299,18 +299,16 @@
                 .attr("transform", "translate(20, 20)");
 
             const legendData = [
-                { shape: "circle", color: "red", label: "Root Node" },
-                { shape: "rect", color: "blue", label: "Rectangle Node" },
-                { shape: "circle", color: "green", label: "Circle Node" },
-                { shape: "rect", color: "orange", label: "Rectangle Node" },
-                { shape: "diamond", color: "purple", label: "Diamond Node" },
-                { shape: "triangle", color: "green", label: "Triangle Node" }
+                { shape: "rect", color: "black", label: "GO Column" },
+                { shape: "triangle", color: "black", label: "Middleware Node" },
+                { shape: "circle", color: "black", label: "DataObject Node" },
+                { shape: "diamond", color: "black", label: "Other" },
             ];
 
             legendData.forEach((d, i) => {
                 const legendItem = legend.append("g")
                     .attr("class", "legend-item")
-                    .attr("transform", `translate(0, ${i * 20})`);
+                    .attr("transform", `translate(0, ${i * 25})`);
 
                 if (d.shape === "circle") {
                     legendItem.append("circle")
