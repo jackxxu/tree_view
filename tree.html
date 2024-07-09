@@ -52,30 +52,36 @@
     </style>
 </head>
 <body>
-    <textarea id="json-input" placeholder="Paste your JSON graph data here...">{
-        "directed": true,
-        "multigraph": false,
-        "graph": {},
-        "nodes": [
-            {"id": "root", "color": "red", "shape": "circle", "hover_text": "Root Node"},
-            {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
-            {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
-            {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
-            {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
-            {"id": 6, "color": "green", "shape": "triangle", "hover_text": "Node 6"}
-        ],
-        "links": [
-            {"source": "root", "target": 2},
-            {"source": "root", "target": 3},
-            {"source": 2, "target": 4},
-            {"source": 3, "target": 5},
-            {"source": 3, "target": 6},
-            {"source": 4, "target": 6}
-        ]
-    }</textarea>
-    <button onclick="updateGraph()">Update Graph</button>
-    <svg width="1200" height="800"></svg>
-    <div class="tooltip" id="tooltip"></div>
+    <div>
+        <textarea id="json-input" placeholder="Paste your JSON graph data here...">{
+            "directed": true,
+            "multigraph": false,
+            "graph": {},
+            "nodes": [
+                {"id": "root", "color": "red", "shape": "circle", "hover_text": "Root Node"},
+                {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
+                {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
+                {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
+                {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
+                {"id": 6, "color": "green", "shape": "triangle", "hover_text": "Node 6"}
+            ],
+            "links": [
+                {"source": "root", "target": 2},
+                {"source": "root", "target": 3},
+                {"source": 2, "target": 4},
+                {"source": 3, "target": 5},
+                {"source": 3, "target": 6},
+                {"source": 4, "target": 6}
+            ]
+        }</textarea>    
+    </div>
+    <div>
+        <button onclick="updateGraph()">Update Graph</button>
+    </div>
+    <div>
+        <svg width="1200" height="800"></svg>
+        <div class="tooltip" id="tooltip"></div>
+    </div>
     <script>
         const svg = d3.select("svg"),
             width = +svg.attr("width"),
