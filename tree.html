@@ -204,8 +204,9 @@
                 .selectAll("text")
                 .data(graph.nodes)
                 .enter().append("text")
-                .attr("dx", 12)
-                .attr("dy", ".35em")
+                .attr("dx", -20)  // Adjusted for closer proximity to node
+                .attr("dy", 20)   // Adjusted for closer proximity to node
+                .attr("transform", d => `rotate(45)`)
                 .text(d => d.id);
 
             simulation.on("tick", () => {
@@ -217,9 +218,7 @@
 
                 node.attr("transform", d => `translate(${d.x},${d.y})`);
 
-                label
-                    .attr("x", d => d.x)
-                    .attr("y", d => d.y);
+                label.attr("transform", d => `translate(${d.x},${d.y}) rotate(45)`);
             });
 
             function dragstarted(event, d) {
