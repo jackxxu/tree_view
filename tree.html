@@ -120,12 +120,13 @@
             });
 
             // Set initial positions
+            const greenNodeYVariation = 20;
             graph.nodes.forEach(node => {
                 if (node.id === "root") {
                     node.fx = width / 2;
                     node.fy = 50;
                 } else if (node.color === "green") {
-                    node.fy = height - 100;
+                    node.fy = height - 100 + (Math.random() - 0.5) * greenNodeYVariation;
                 }
             });
 
@@ -135,7 +136,7 @@
                 .force("center", d3.forceCenter(width / 2, height / 2))
                 .force("y", d3.forceY(d => {
                     if (d.id === "root") return 50;
-                    if (d.color === "green") return height - 100;
+                    if (d.color === "green") return d.fy;
                     return levelMap[d.id] * 100;
                 }).strength(1))
                 .force("collide", d3.forceCollide().radius(50));
@@ -204,8 +205,8 @@
                 .selectAll("text")
                 .data(graph.nodes)
                 .enter().append("text")
-                .attr("dx", -20)  // Adjusted for closer proximity to node
-                .attr("dy", 20)   // Adjusted for closer proximity to node
+                .attr("dx", 12)
+                .attr("dy", ".35em")
                 .attr("transform", d => `rotate(45)`)
                 .text(d => d.id);
 
@@ -218,7 +219,7 @@
 
                 node.attr("transform", d => `translate(${d.x},${d.y})`);
 
-                label.attr("transform", d => `translate(${d.x},${d.y}) rotate(45)`);
+                label.attr("transform", d => `translate(${d.x},${d.y + 12}) rotate(45)`);
             });
 
             function dragstarted(event, d) {
