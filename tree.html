@@ -291,6 +291,54 @@
                 link.classed("highlighted-link-incoming", false);
                 link.classed("highlighted-link-outgoing", false);
             }
+
+
+            // Add legend
+            const legend = svg.append("g")
+                .attr("class", "legend")
+                .attr("transform", "translate(20, 20)");
+
+            const legendData = [
+                { shape: "circle", color: "red", label: "Root Node" },
+                { shape: "rect", color: "blue", label: "Rectangle Node" },
+                { shape: "circle", color: "green", label: "Circle Node" },
+                { shape: "rect", color: "orange", label: "Rectangle Node" },
+                { shape: "diamond", color: "purple", label: "Diamond Node" },
+                { shape: "triangle", color: "green", label: "Triangle Node" }
+            ];
+
+            legendData.forEach((d, i) => {
+                const legendItem = legend.append("g")
+                    .attr("class", "legend-item")
+                    .attr("transform", `translate(0, ${i * 20})`);
+
+                if (d.shape === "circle") {
+                    legendItem.append("circle")
+                        .attr("r", 8)
+                        .attr("fill", d.color);
+                } else if (d.shape === "rect") {
+                    legendItem.append("rect")
+                        .attr("width", 16)
+                        .attr("height", 16)
+                        .attr("x", -8)
+                        .attr("y", -8)
+                        .attr("fill", d.color);
+                } else if (d.shape === "diamond") {
+                    legendItem.append("path")
+                        .attr("d", d3.symbol().type(d3.symbolDiamond).size(256))
+                        .attr("fill", d.color);
+                } else if (d.shape === "triangle") {
+                    legendItem.append("path")
+                        .attr("d", d3.symbol().type(d3.symbolTriangle).size(256))
+                        .attr("fill", d.color);
+                }
+
+                legendItem.append("text")
+                    .attr("x", 20)
+                    .attr("y", 5)
+                    .text(d.label);
+            });
+
         }
 
         // Initialize the graph visualization with default data
