@@ -15,6 +15,11 @@
             stroke-opacity: 0.6;
             stroke-width: 1.5px;
         }
+        .additional-link {
+            stroke: #ff0000;
+            stroke-dasharray: 3, 3;
+            stroke-width: 1.5px;
+        }
         textarea {
             width: 100%;
             height: 150px;
@@ -57,7 +62,7 @@
             {"source": 2, "target": 4},
             {"source": 3, "target": 5},
             {"source": 3, "target": 6},
-            {"source": 4, "target": 6}
+            {"source": 4, "target": 6} 
         ]
     }</textarea>
     <button onclick="updateGraph()">Update Graph</button>
@@ -67,14 +72,6 @@
         const svg = d3.select("svg"),
             width = +svg.attr("width"),
             height = +svg.attr("height");
-
-        const zoom = d3.zoom()
-            .scaleExtent([0.1, 2])
-            .on("zoom", (event) => {
-                g.attr("transform", event.transform);
-            });
-
-        svg.call(zoom);
 
         const tooltip = d3.select("#tooltip");
 
@@ -185,6 +182,20 @@
                 .attr("dy", ".35em")
                 .attr("transform", d => `rotate(45,${d.x},${d.y + 12})`)
                 .text(d => d.data.id);
+
+            // Add additional links to connect nodes across branches
+            const additionalLinks = graph.links.filter(link => {
+                return !root.links().some(d => d.source.data.id === link.source && d.target.data.id === link.target);
+            });
+
+            g.selectAll(".additional-link")
+                .data(additionalLinks)
+                .enter().append("line")
+                .attr("class", "additional-link")
+                .attr("x1", d => nodeMap[d.source].x)
+                .attr("y1", d => nodeMap[d.source].y)
+                .attr("x2", d => nodeMap[d.target].x)
+                .attr("y2", d => nodeMap[d.target].y);
         }
 
         // Initialize the graph visualization with default data
