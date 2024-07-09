@@ -162,9 +162,10 @@
                 .enter().append("text")
                 .attr("class", "label")
                 .attr("x", d => d.x)
-                .attr("y", d => d.y)
-                .attr("dx", 12)
+                .attr("y", d => d.y + 12)
+                .attr("dx", 0)
                 .attr("dy", ".35em")
+                .attr("transform", d => `rotate(45,${d.x},${d.y + 12})`)
                 .text(d => d.data.id);
         }
 
