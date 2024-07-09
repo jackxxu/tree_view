@@ -48,8 +48,8 @@
             {"id": 2, "color": "blue", "shape": "rect", "hover_text": "Node 2"},
             {"id": 3, "color": "green", "shape": "circle", "hover_text": "Node 3"},
             {"id": 4, "color": "orange", "shape": "rect", "hover_text": "Node 4"},
-            {"id": 5, "color": "purple", "shape": "circle", "hover_text": "Node 5"},
-            {"id": 6, "color": "yellow", "shape": "rect", "hover_text": "Node 6"}
+            {"id": 5, "color": "purple", "shape": "diamond", "hover_text": "Node 5"},
+            {"id": 6, "color": "yellow", "shape": "triangle", "hover_text": "Node 6"}
         ],
         "links": [
             {"source": 1, "target": 2},
@@ -135,6 +135,14 @@
                         .attr("height", 16)
                         .attr("x", -8)
                         .attr("y", -8)
+                        .attr("fill", d.color || "#1f77b4");
+                } else if (d.shape === "diamond") {
+                    d3.select(this).append("path")
+                        .attr("d", d3.symbol().type(d3.symbolDiamond).size(256))
+                        .attr("fill", d.color || "#1f77b4");
+                } else if (d.shape === "triangle") {
+                    d3.select(this).append("path")
+                        .attr("d", d3.symbol().type(d3.symbolTriangle).size(256))
                         .attr("fill", d.color || "#1f77b4");
                 } else {
                     d3.select(this).append("circle")
